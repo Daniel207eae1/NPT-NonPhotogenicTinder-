@@ -1,0 +1,27 @@
+<div class = "Contenedor">
+  <div class="Contenido1">
+    <img src="Images/Profile.png" alt="Profile" id="Prof">
+    <div id="Datos">
+      <p>
+        {person.name}
+      </p>
+      <p>
+        {person.age}
+      </p>
+    </div>
+    <p id="Descripcion">
+      {person.descripcion}
+    </p>
+  </div>
+  <div class="Contenido2">
+    <p>
+      <a href="1" id = "Updelimg">Upload Image</a>
+      <img src="Images/Necesario.png" alt="Necessary" id="Necess">
+    </p>
+    <br>
+    <p><a href="2" id = "Updelimg">Delete Image</a></p>
+  </div>
+  <div class="Contenido3">
+    
+  </div>
+</div>
