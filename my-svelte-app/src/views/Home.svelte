@@ -1,5 +1,7 @@
 <script>
     import { loop_guard } from "svelte/internal";
+    import {user} from '../stores/User'
+    import {onMount} from 'svelte'
 
     let personas = [
         {
@@ -36,6 +38,11 @@
         }
     }
     const contadormas = () => cuenta++;
+    onMount(() => {
+    if(!$user){
+      navigate('/Login',{replace:true})
+    }
+    })
 </script>
 
 <div class="Contenedor">

@@ -1,48 +1,60 @@
 <script>
-    let person = {
-      name: 'Juan Alberto Gutierrez',
-      age: 28,
-      orientacion: 'Heterosexual',
-      location: 'Medellin/Antioquia',
-      hobbies: ['Cocinar', 'Leer', 'Viajar','Comer','Jugar Videojuegos','Perrear','Ver peliculas','Escuchar musica','Bailar tango','Salchipapa','Salsa choke'
-                ,'Comer pescado','Jugar futbol'],
-      descripcion: 'Hola me llamo juan y en realidad no existo pero es un buen test para la pagina :D',
-      Hombre: true
-    };
-    var perfilimagen;
-    var colores;
-    if (person.Hombre == true){
-      perfilimagen = "Images/PerfilHombre.png";
-      colores = "#0998a588";
+  import {user} from '../stores/User'
+  import {onMount} from 'svelte'
+  import {navigate} from 'svelte-routing'
+
+  onMount(() => {
+    if(!$user){
+      navigate('/Login',{replace:true})
     }
-    else{
-      perfilimagen = "Images/PerfilMujer.png";
-      colores = "#d0296688";
-    }
-  </script>
+  })
+
+  let person = {
+    name: 'Juan Alberto Gutierrez',
+    age: 28,
+    orientacion: 'Heterosexual',
+    location: 'Medellin/Antioquia',
+    hobbies: ['Cocinar', 'Leer', 'Viajar','Comer','Jugar Videojuegos','Perrear','Ver peliculas','Escuchar musica','Bailar tango','Salchipapa','Salsa choke'
+              ,'Comer pescado','Jugar futbol'],
+    descripcion: 'Hola me llamo juan y en realidad no existo pero es un buen test para la pagina :D',
+    Hombre: true
+  };
+  var perfilimagen;
+  var colores;
+  if (person.Hombre == true){
+    perfilimagen = "Images/PerfilHombre.png";
+    colores = "#0998a588";
+  }
+  else{
+    perfilimagen = "Images/PerfilMujer.png";
+    colores = "#d0296688";
+  }
+</script>
   
-  <div class = "Contenedor">
-    <img src={perfilimagen} id="PerfilImage" alt="Perfil">
-    <div class="Datos">
-      <p style="font-size: 25px;">{person.name}</p>
-      <p style="font-size: 25px;">{person.orientacion}</p>
-      <p style="font-size: 25px;">{person.location}</p>
-      <p style="font-size: 25px;">{person.age}</p>
+  {#if $user}
+    <div class = "Contenedor">
+      <img src={perfilimagen} id="PerfilImage" alt="Perfil">
+      <div class="Datos">
+        <p style="font-size: 25px;">{person.name}</p>
+        <p style="font-size: 25px;">{person.orientacion}</p>
+        <p style="font-size: 25px;">{person.location}</p>
+        <p style="font-size: 25px;">{person.age}</p>
+      </div>
+      <div class="Gustos">
+        {#each person.hobbies as hobbie}
+          <div class = "Gusto">
+            <p style="background-color: {colores};" class="Gustoo">{hobbie}</p>
+          </div>
+        {/each}
+      </div>
+      <a style="height: fit-content;margin-left: 2%;" href="/"><img style="height: 80px;" src="Images/Editar.png" alt="Editar"></a>
+      <div class="Descripcion">
+        <p style="font-size: 140%;margin: 2%;">
+          {person.descripcion}
+        </p>
+      </div>
     </div>
-    <div class="Gustos">
-      {#each person.hobbies as hobbie}
-        <div class = "Gusto">
-          <p style="background-color: {colores};" class="Gustoo">{hobbie}</p>
-        </div>
-      {/each}
-    </div>
-    <a style="height: fit-content;margin-left: 2%;" href="/"><img style="height: 80px;" src="Images/Editar.png" alt="Editar"></a>
-    <div class="Descripcion">
-      <p style="font-size: 140%;margin: 2%;">
-        {person.descripcion}
-      </p>
-    </div>
-  </div>
+  {/if}
   
   
   <style>
