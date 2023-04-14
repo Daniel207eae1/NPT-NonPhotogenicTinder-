@@ -11,10 +11,10 @@
 
   onMount(async() => {
     await user.current()
-    if($user === false){
+    if(auth.currentUser === null ){
       navigate('/Login',{replace:true})
     }
-  })
+  });
 
   let items = [
       { title: "Home", link: "/Home", imageurl: "Images/Home.png"},
@@ -23,20 +23,22 @@
       { title: "Perfil", link: "/Perfil" , imageurl: "Images/Perfil.png"},
       { title: "SignOut", link: "/Login", imageurl: "Images/SignOut.png"}
     ];
+
   const cerrarSesion = async() => {
     try {
       await auth.signOut(auth)
-      user.setUser(null)
+      user.setUser(false)
       navigate('/Login', {replace: true})
+      console.log("Hola")
     } catch (error) {
       console.log(error)
     }
   }
-</script>
 
+</script>
 <Router>
-  {#if $user}
   <nav>
+    {#if $user}
     <ul class="Navegador">
       {#each items as item}
       {#if item.title == "SignOut"}
@@ -47,17 +49,21 @@
               </Link>
             </a>
         </li>
+        {:else}
+        <li class="Navelement">
+          <a class = "Nava" href={item.link} id={item.title}>
+            <Link to={item.link}>
+              <img class="Navicons" src={item.imageurl} alt={item.title}/>
+            </Link>
+          </a>
+      </li>
         {/if}
       {/each}
     </ul>
+    {/if}
   </nav>
-  {:else}
-  <script>
-    if(!$user){
-      navigate('/Login',{replace:true})
-    }
-  </script>
-  {/if}
+
+  <!--{/if}-->
   <Route path="/Home">
     <Home></Home>
   </Route>
@@ -81,7 +87,8 @@
       flex-flow: row wrap;
       justify-content: center;
       align-items: center;
-      border-bottom: black 3px solid;
+      border-bottom: rgba(186, 130, 47, 0.241);
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.25);
       margin: 0px;
       padding: 2%;
       background: rgba(186, 130, 47, 0.241);

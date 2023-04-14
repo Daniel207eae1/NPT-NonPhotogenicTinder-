@@ -2,6 +2,7 @@
     import { loop_guard } from "svelte/internal";
     import {user} from '../stores/User'
     import {onMount} from 'svelte'
+    import {navigate} from 'svelte-routing'
 
     let personas = [
         {

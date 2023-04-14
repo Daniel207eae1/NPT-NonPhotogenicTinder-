@@ -1,5 +1,6 @@
 <script>
     import {user} from '../stores/User'
+    import {navigate} from 'svelte-routing'
     import {onMount} from 'svelte'
 
     onMount(() => {

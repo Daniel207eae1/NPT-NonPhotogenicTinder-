@@ -2,9 +2,11 @@
   import {user} from '../stores/User'
   import {onMount} from 'svelte'
   import {navigate} from 'svelte-routing'
+  import {auth} from '../firebase'
 
   onMount(() => {
-    if(!$user){
+    if(user == null){
+      console.log("Hola")
       navigate('/Login',{replace:true})
     }
   })
@@ -23,14 +25,16 @@
   var colores;
   if (person.Hombre == true){
     perfilimagen = "Images/PerfilHombre.png";
-    colores = "#0998a588";
+    colores = "";
   }
   else{
     perfilimagen = "Images/PerfilMujer.png";
-    colores = "#d0296688";
+    colores = "#";
   }
-</script>
   
+</script>
+
+
   {#if $user}
     <div class = "Contenedor">
       <img src={perfilimagen} id="PerfilImage" alt="Perfil">
@@ -43,7 +47,7 @@
       <div class="Gustos">
         {#each person.hobbies as hobbie}
           <div class = "Gusto">
-            <p style="background-color: {colores};" class="Gustoo">{hobbie}</p>
+            <p class="Gustoo {person.Hombre ? 'gusto_hombre' : 'gusto_mujer'}">{hobbie}</p>
           </div>
         {/each}
       </div>
@@ -55,6 +59,7 @@
       </div>
     </div>
   {/if}
+  
   
   
   <style>
@@ -71,12 +76,13 @@
       margin: 10px;
       margin-top: 0px;
       box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.25);
-      border-radius: 45%;
+      border-radius: 0.25rem;
       width: max-content;
       padding: 20px;
       padding-left: 28px;
       padding-right: 28px;
     }
+
     .Gustos{
       margin: 70px;
       margin-right: 20px;
@@ -88,6 +94,21 @@
       height: 310px;
       overflow-y: scroll;
     }
+    .gusto_hombre {
+      background-color: #0998a588;
+    }
+    .gusto_hombre:hover {
+      background-color: #0da9b888;
+
+    }
+    .gusto_mujer {
+      background-color: #d0296688;
+    }
+    .gusto_mujer:hover {
+      background-color: #de2b6c88;
+
+    }
+
     .Datos{
       margin-top: 70px;
       height: fit-content;
