@@ -1,8 +1,8 @@
 <script>
-    import { loop_guard } from "svelte/internal";
     import {user} from '../stores/User'
     import {onMount} from 'svelte'
     import {navigate} from 'svelte-routing'
+    import {setDoc, doc, collection} from 'firebase/firestore'
 
     let personas = [
         {
@@ -38,7 +38,12 @@
             colores = "#d0296688";
         }
     }
-    const contadormas = () => cuenta++;
+    const SiMatch = () => {
+        cuenta++;
+    }
+    const NoMatch = () => {
+        cuenta++;
+    }
     onMount(() => {
     if(!$user){
       navigate('/Login',{replace:true})
@@ -69,10 +74,10 @@
     </div>
     <div class = "Derecha">
         <div class="Match">
-            <button on:click={contadormas} style="background-color: transparent;margin-bottom: 50px;border: 0px;"><img class="Matchimg" id="Matchimg" alt="Matchimg" src="Images/Match.png"></button>
+            <button on:click={SiMatch} style="background-color: transparent;margin-bottom: 50px;border: 0px;"><img class="Matchimg" id="Matchimg" alt="Matchimg" src="Images/Match.png"></button>
         </div>
         <div class="NoMatch">
-            <button style="background-color: transparent;margin-top: 50px;border: 0px;"><img class="Matchimg" id="UnMatchimg" alt="Unmatchimg" src="Images/UnMatch.png"></button>
+            <button on:click={NoMatch} style="background-color: transparent;margin-top: 50px;border: 0px;"><img class="Matchimg" id="UnMatchimg" alt="Unmatchimg" src="Images/UnMatch.png"></button>
         </div>
     </div>
 </div>
