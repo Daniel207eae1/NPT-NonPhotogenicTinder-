@@ -5,9 +5,12 @@
   import {auth} from '../firebase'
 
   onMount(() => {
-    if(user == null){
-      console.log("Hola")
+    if(!$user){
+      console.log("pp")
       navigate('/Login',{replace:true})
+    }
+    else{
+      console.log("asdasd")
     }
   })
 
@@ -35,34 +38,52 @@
 </script>
 
 
-  {#if $user}
-    <div class = "Contenedor">
-      <img src={perfilimagen} id="PerfilImage" alt="Perfil">
-      <div class="Datos">
-        <p style="font-size: 25px;">{person.name}</p>
-        <p style="font-size: 25px;">{person.orientacion}</p>
-        <p style="font-size: 25px;">{person.location}</p>
-        <p style="font-size: 25px;">{person.age}</p>
-      </div>
-      <div class="Gustos">
-        {#each person.hobbies as hobbie}
-          <div class = "Gusto">
-            <p class="Gustoo {person.Hombre ? 'gusto_hombre' : 'gusto_mujer'}">{hobbie}</p>
-          </div>
-        {/each}
-      </div>
-      <a style="height: fit-content;margin-left: 2%;" href="/"><img style="height: 80px;" src="Images/Editar.png" alt="Editar"></a>
-      <div class="Descripcion">
-        <p style="font-size: 140%;margin: 2%;">
-          {person.descripcion}
-        </p>
-      </div>
+<div class = bck>
+  <img src = "Images/BackgroundLogin.png" id = "Background" alt="Background">
+</div>
+{#if $user}
+  <div class = "Contenedor">
+    <img src={perfilimagen} id="PerfilImage" alt="Perfil">
+    <div class="Datos">
+      <p style="font-size: 25px;">{person.name}</p>
+      <p style="font-size: 25px;">{person.orientacion}</p>
+      <p style="font-size: 25px;">{person.location}</p>
+      <p style="font-size: 25px;">{person.age}</p>
     </div>
+    <div class="Gustos">
+      {#each person.hobbies as hobbie}
+        <div class = "Gusto">
+          <p class="Gustoo {person.Hombre ? 'gusto_hombre' : 'gusto_mujer'}">{hobbie}</p>
+        </div>
+      {/each}
+    </div>
+    <a style="height: fit-content;margin-left: 2%;" href="/"><img style="height: 80px;" src="Images/Editar.png" alt="Editar"></a>
+    <div class="Descripcion">
+      <p style="font-size: 140%;margin: 2%;">
+        {person.descripcion}
+      </p>
+    </div>
+  </div>
   {/if}
   
   
   
   <style>
+    .bck{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #Background{
+        height: 34rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+        backdrop-filter: blur(10px);
+        filter: opacity(0.05);
+    }
     .Descripcion{
       margin-left: 70px;
       height: 200px;
@@ -123,48 +144,6 @@
       margin-right: 40px;
       width: 245.5px;
       height: 245.5px;
-    }
-    .Navegador{
-      display: flex;
-      flex-flow: row wrap;
-      justify-content: center;
-      border-bottom: black 3px solid;
-      margin: 0px;
-      padding: 2%;
-      background: rgba(186, 130, 47, 0.241);
-    }
-    .Navelement{
-      width: 40px;
-      height: 40px;
-      display: flex;
-      justify-content: center;
-      margin-right: 0.5%;
-      margin-left: 0.5%;
-    }
-    .Nava{
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .Navicons{
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-    }
-    .Navicons:hover{
-      width: 170%;
-      height: 170%;
-      display: flex;
-      justify-content: center;
-      background: rgba(185, 135, 59, 0.366);
-      border-radius: 20%;
-      padding: 20%;
-      box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.25);
-    }
-    #Perfil{
-      background: rgba(185, 135, 59, 0.366);
-      border-radius: 50%;
     }
     :global(body){
       padding: 0px;
