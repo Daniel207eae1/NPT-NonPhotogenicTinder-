@@ -15,8 +15,8 @@
     try {
       await auth.signOut(auth)
       user.setUser(null)
+      localStorage.removeItem('user')
       navigate('/Login', {replace: true})
-      console.log("Hola")
     } catch (error) {
       console.log(error)
     }
