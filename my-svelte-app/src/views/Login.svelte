@@ -2,7 +2,7 @@
   import { user } from "../stores/User";
   import { navigate } from "svelte-routing";
   import { auth, provider } from "../firebase";
-  import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+  import { signInWithPopup } from "firebase/auth";
 
   const procesarFormulario = async () => {
     try {
