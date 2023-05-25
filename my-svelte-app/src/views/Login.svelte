@@ -2,7 +2,7 @@
   import { user } from "../stores/User";
   import { navigate } from "svelte-routing";
   import { auth, provider } from "../firebase";
-  import { signInWithPopup } from "firebase/auth";
+  import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
   const procesarFormulario = async () => {
     try {
@@ -10,8 +10,23 @@
       console.log(res);
       user.setUser(res.user);
       localStorage.setItem("user", user);
-      const usid = user.uid;
-      console.log(usid);
+      const credential = GoogleAuthProvider.credentialFromResult(res);
+      localStorage.setItem("token", credential.accessToken);
+      console.log(localStorage.getItem("token"));
+      let response = await fetch("http://localhost:3000/protected", {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`, // Reemplaza <token> con el token de autenticación válido
+        },
+        mode: "cors",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        response = data.message;
+        console.log(data.message);
+      } else {
+        response = "Error en la solicitud";
+      }
       navigate("/Perfil", { replace: true });
     } catch (error) {
       console.log(error);

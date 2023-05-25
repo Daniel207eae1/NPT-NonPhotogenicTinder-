@@ -24,7 +24,7 @@
     }
   });
 
-  console.log(person);
+  let response = null;
 </script>
 
 <Navbar />

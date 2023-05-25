@@ -18,6 +18,7 @@
       localStorage.removeItem("user");
       console.log("listo");
       localStorage.removeItem("render");
+      localStorage.removeItem("token");
       navigate("/Login", { replace: true });
     } catch (error) {
       console.log(error);
