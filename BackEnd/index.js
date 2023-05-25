@@ -11,6 +11,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 const db = getFirestore();
+
 const res = db.collection('Usuarios').add({
   name: 'Tokyo',
   country: 'Japan'

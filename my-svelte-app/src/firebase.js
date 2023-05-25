@@ -24,7 +24,8 @@ const firebaseConfig = {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                resolve(user)
-                //const uid = user.uid;
+                const uid = user.uid;
+                localStorage.setItem('UserId',uid);
             } else {
               reject
             }
