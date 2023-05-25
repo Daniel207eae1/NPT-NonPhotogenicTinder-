@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-
-
 router.get('/user', (req, res) => {
     // tu lógica de manejo de la ruta aquí
     let person = {
