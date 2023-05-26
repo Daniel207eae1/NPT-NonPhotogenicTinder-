@@ -25,10 +25,22 @@
 
   function sendMessage() {
     if (newMessage.trim() !== "") {
-      activeConversation.messages = [
-        ...activeConversation.messages,
-        newMessage,
-      ];
+      const message = {
+        content: newMessage,
+        sender: "Usuario Actual",
+      };
+      activeConversation.messages = [...activeConversation.messages, message];
+      newMessage = "";
+    }
+  }
+
+  function sendMessageOtherUser() {
+    if (newMessage.trim() !== "") {
+      const message = {
+        content: newMessage,
+        sender: "Otro Usuario",
+      };
+      activeConversation.messages = [...activeConversation.messages, message];
       newMessage = "";
     }
   }
@@ -49,14 +61,21 @@
     </ul>
   </div>
 </div>
+
 <main>
   <div class="participant">
     <h2>{activeConversation.person}</h2>
   </div>
   <ul class="message-list">
     {#each activeConversation.messages as message}
-      <li>
-        <div class="message">{message}</div>
+      <li
+        class={message.sender === "Usuario Actual"
+          ? "message sent"
+          : "message received"}
+      >
+        <div class="message-container">
+          <div class="message">{message.content}</div>
+        </div>
       </li>
     {/each}
   </ul>
@@ -68,6 +87,7 @@
       placeholder="Escribe un mensaje..."
     />
     <button on:click={sendMessage}>Enviar</button>
+    <button on:click={sendMessageOtherUser}>Enviar como Otro Usuario</button>
   </div>
 </main>
 
@@ -112,6 +132,7 @@
   }
 
   .message-list li {
+    display: flex;
     margin-bottom: 10px;
   }
 
@@ -123,6 +144,14 @@
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     margin: 0%;
     word-wrap: break-word;
+  }
+
+  .message-list li.sent {
+    justify-content: flex-end;
+  }
+
+  .message-list li.received {
+    justify-content: flex-start;
   }
 
   .input-container {
