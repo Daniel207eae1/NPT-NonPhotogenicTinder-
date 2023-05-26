@@ -3,23 +3,55 @@
   import { navigate } from "svelte-routing";
   import { auth, provider } from "../firebase";
   import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+  import { onMount } from "svelte";
 
   const procesarFormulario = async () => {
     try {
       const res = await signInWithPopup(auth, provider);
-      console.log(res);
+      localStorage.setItem("uid", res.user.uid);
+
+      //BUSCAR SI EL USUARIO ESTA EN LA BASE DE DATOS
+      try {
+        const requestOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ uid: localStorage.getItem("uid") }),
+          //body: JSON.stringify(localStorage.getItem("uid")),
+        };
+        const request = new Request(
+          "http://localhost:3000/NewUser",
+          requestOptions
+        );
+        const response = await fetch(request);
+        const data = await response.text();
+        //respuesta = JSON.stringify(data);
+        //respuesta = data;
+
+        console.log(data);
+        if (data == "true") {
+          //IF USUARIO ESTA REGISTRADO
+          localStorage.setItem("user", user);
+          navigate("/Perfil", { replace: true });
+        } else {
+          //ELSE LLEVARLO A CONFIG PERFIL
+          navigate("/ConfigPerfil", { replace: true });
+        }
+      } catch (error) {}
+
       user.setUser(res.user);
-      localStorage.setItem("user", user);
+
+      /*
       const credential = GoogleAuthProvider.credentialFromResult(res);
       localStorage.setItem("token", credential.accessToken);
       console.log(localStorage.getItem("token"));
-      let response = await fetch("http://localhost:3000/protected", {
+      let response = await fetch("http://localhost:3000/", {
         headers: {
           authorization: `Bearer ${localStorage.getItem("token")}`, // Reemplaza <token> con el token de autenticación válido
         },
         mode: "cors",
       });
-
       if (response.ok) {
         const data = await response.json();
         response = data.message;
@@ -27,11 +59,19 @@
       } else {
         response = "Error en la solicitud";
       }
-      navigate("/Perfil", { replace: true });
+      */
     } catch (error) {
       console.log(error);
     }
   };
+
+  onMount(() => {
+    if ($user) {
+      navigate("/Perfil", { replace: true });
+      console.log("Dirigiendo a perfil..");
+    }
+    localStorage.clear();
+  });
 
   let Acceso = [
     {

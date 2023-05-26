@@ -2,6 +2,7 @@
   import { user } from "../stores/User";
   import { navigate } from "svelte-routing";
   import { onMount } from "svelte";
+  import Navbar from "../components/Navbar.svelte";
 
   onMount(() => {
     if (!$user) {
@@ -33,6 +34,7 @@
   }
 </script>
 
+<Navbar />
 <div class="chat-container">
   <div>
     <h2>Chats</h2>

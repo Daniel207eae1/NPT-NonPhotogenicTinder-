@@ -2,6 +2,7 @@
   import { user } from "../stores/User";
   import { navigate } from "svelte-routing";
   import { onMount } from "svelte";
+  import { auth } from "../firebase";
 
   onMount(() => {
     if ($user == null) {
@@ -9,34 +10,87 @@
     }
   });
 
+  const uid = localStorage.getItem("uid");
   let nuevoHobbie = "";
-  let personHobbies = [
-    "Cocinar",
-    "Leer",
-    "Viajar",
-    "Comer",
-    "Jugar Videojuegos",
-    "Perrear",
-    "Ver peliculas",
-    "Escuchar musica",
-    "Bailar tango",
-    "Salchipapa",
-    "Salsa choke",
-    "Comer pescado",
-    "Jugar futbol",
-  ];
-  let person = {
-    name: "",
-    age: 0,
-    orientacion: "",
-    location: "",
-    descripcion: "",
-    Hombre: true,
-  };
-
-  function GuardarCambios() {
-    navigate("/Perfil", { replace: true });
+  let personHobbies = [];
+  let person = {};
+  //IF ESTA CREADO COGER LOS DATOS DE LA BD
+  if (localStorage.getItem("user")) {
+    console.log("ejecc");
+    const ObtenerUsuario = async () => {
+      const response = await fetch("http://localhost:3000/GetUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uid }),
+      });
+      const data = await response.json();
+      if (data != null) {
+        personHobbies = data.personHobbies;
+        person = data;
+      }
+      console.log(data.Hombre);
+    };
+    ObtenerUsuario();
   }
+  //IF NO ESTA CREADO CREAR VARIABLES VACIAS Y RELLENAR CON LOS CAMPOS.
+  else {
+    person = {
+      id: uid,
+      name: "",
+      age: 0,
+      hetero: true,
+      location: "",
+      hobbies: [],
+      descripcion: "",
+      Hombre: true,
+      Configurado: true,
+    };
+  }
+  console.log(personHobbies.length);
+  const GuardarCambios = async () => {
+    var switchLabel = document.getElementById("switchLabel");
+    var switchLabelHH = document.getElementById("switchLabelHH");
+    if (switchLabel.textContent == "FEMENINO") {
+      person.Hombre = false;
+    } else {
+      person.Hombre = true;
+    }
+
+    if (switchLabelHH.textContent == "HOMOSEXUAL") {
+      person.hetero = false;
+    } else {
+      person.hetero = true;
+    }
+
+    console.log("aa" + personHobbies);
+    const response = await fetch("http://localhost:3000/ConfigUsers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ personHobbies, person }),
+    });
+    console.log("aa" + personHobbies.length);
+    const data = await response.text();
+    console.log("response" + data);
+    if (data == "true") {
+      //IF USUARIO ESTA REGISTRADO
+      if (!localStorage.getItem("user")) {
+        alert("VUELVE A INICIAR SESION.");
+        localStorage.clear();
+        await auth.signOut(auth);
+        user.setUser(null);
+        navigate("/Login", { replace: true });
+      } else {
+        navigate("/Perfil", { replace: true });
+      }
+    } else {
+      //ELSE LLEVARLO A CONFIG PERFIL
+      alert("REVISA LOS CAMPOS QUE ESTAN EN ROJO.");
+    }
+  };
 
   function changeSwitch() {
     var switchLabel = document.getElementById("switchLabel");
@@ -63,6 +117,7 @@
     console.log("Elemento eliminado:", hobbieEliminado);
     if (personHobbies.length > 10) {
       personHobbies = personHobbies.filter((_, i) => i !== index);
+      console.log("borrado");
     } else {
       alert("¡No seas timido!: La cantidad minima de Hobbies es 10.");
     }
@@ -82,6 +137,8 @@
   //Si esta configurado ya hacer algo
 
   //Si no esta configurado hacer otra cosa
+  $: esMujer = !person.Hombre;
+  $: esHomo = !person.hetero;
 </script>
 
 <p id="Title">Configuracion de Perfil</p>
@@ -92,7 +149,7 @@
   <div class="DatosPerfil">
     <p style="margin-top: 0%;">¿Con cual te identificas mas?</p>
     <label class="switch">
-      <input type="checkbox" on:change={changeSwitch} />
+      <input type="checkbox" on:change={changeSwitch} checked={esMujer} />
       <span class="slider" />
       <span id="switchLabel">MASCULINO</span>
     </label>
@@ -101,7 +158,7 @@
       <input
         type="text"
         id="textboxNombre"
-        value={person.name}
+        bind:value={person.name}
         minlength="3"
         required
       />
@@ -109,7 +166,7 @@
     </div>
     <p>¿Que orientacion te identifica mas?</p>
     <label class="switchHH">
-      <input type="checkbox" on:change={changeSwitchHH} />
+      <input type="checkbox" on:change={changeSwitchHH} checked={esHomo} />
       <span class="sliderHH" />
       <span id="switchLabelHH">HETEROSEXUAL</span>
     </label>
@@ -118,7 +175,7 @@
       <input
         type="text"
         id="textboxCiudad"
-        value={person.location}
+        bind:value={person.location}
         minlength="2"
         required
       />
@@ -127,12 +184,12 @@
     <p>Edad</p>
     <div class="textbox-container">
       <input
-        type="text"
+        type="number"
         id="textboxEdad"
         maxlength="2"
-        minlength="1"
-        pattern="[0-9]{(1, 2)}"
-        value={person.age}
+        minlength="2"
+        min="16"
+        bind:value={person.age}
         required
       />
       <div class="base-line" />
@@ -171,8 +228,8 @@
     <textarea
       type="text"
       class="DescripcionText"
-      value={person.descripcion}
-      minlength="192"
+      bind:value={person.descripcion}
+      minlength="100"
       required
     />
     <button on:click={GuardarCambios} class="GuardarCambios">

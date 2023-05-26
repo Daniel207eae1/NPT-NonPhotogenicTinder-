@@ -1,16 +1,23 @@
 const express = require("express");
-const app = express();
 const cors = require("cors");
+const bodyParser = require("body-parser");
+const app = express();
 const match = require("./routes/match.js");
+const NewUser = require("./routes/NewUser.js");
 const user = require("./stores/user.js");
 const {
   getFirestore,
   Timestamp,
   FieldValue,
 } = require("firebase-admin/firestore");
+const {
+  initializeApp,
+  applicationDefault,
+  cert,
+} = require("firebase-admin/app");
 
+app.use(bodyParser.json());
 app.use(cors());
-
 app.use(
   cors({
     origin: "*", // Cambia esto a tu dominio o '*' para permitir cualquier origen
@@ -18,13 +25,130 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 var admin = require("firebase-admin");
 var serviceAccount = require("./nonphotogenictinder-7d03b-firebase-adminsdk-i8laq-6891a32a36.json");
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+const db = getFirestore();
+
+const Usuarios = db.collection("Usuarios");
+
+app.post("/NewUser", (req, res) => {
+  // tu lógica de manejo de la ruta aquí
+  const uid = req.body.uid;
+  console.log(uid);
+  let found = false;
+
+  Usuarios.get()
+    .then((snapshot) => {
+      snapshot.forEach((doc) => {
+        const docid = doc.id;
+        const data = doc.data();
+        // Hacer algo con los datos de cada documento
+        if (docid == uid) {
+          console.log("UNSSSENDDD");
+          if (data.Configurado) {
+            found = true;
+          }
+          return;
+        }
+      });
+      console.log("asd" + found);
+      if (found == true) {
+        res.send(true);
+      } else {
+        res.send(false);
+      }
+    })
+    .catch((error) => {
+      console.log("Error al obtener documentos", error);
+    });
+});
+
+app.post("/ConfigUsers", (req, res) => {
+  const { personHobbies, person } = req.body;
+  let pd = false;
+
+  if (person.name.length > 2) {
+    console.log("ass");
+    if (person.hetero !== null) {
+      console.log("as2");
+      if (person.location.length > 4) {
+        console.log("ass3");
+        if (person.descripcion.length > 100) {
+          console.log("ass4");
+          if (person.age > 15) {
+            console.log("ass5");
+            if (person.hombre !== null) {
+              console.log("ass6");
+              if (personHobbies.length >= 10) {
+                person.personHobbies = personHobbies;
+                console.log(person.personHobbies);
+                console.log(person.id);
+                // Crear un nuevo documento en la colección de Usuarios en Firestore
+                db.collection("Usuarios")
+                  .doc(person.id)
+                  .set({
+                    ...person,
+                  })
+                  .then(() => {
+                    console.log("Usuario configurado en Firestore");
+                    res.send(true); // Enviar un valor booleano true si el usuario se crea correctamente
+                  })
+                  .catch((error) => {
+                    console.error("Error al crear usuario en Firestore", error);
+                    res.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
+                  });
+                pd = true;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if (pd == false) {
+    res.send(false);
+  }
+});
+
+app.post("/GetUser", (req, res) => {
+  const uid = req.body.uid;
+  db.collection("Usuarios")
+    .doc(uid)
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        const userData = doc.data();
+        res.send(userData);
+      } else {
+        res.send(null); // Si no se encuentra el usuario, enviar null
+      }
+    })
+    .catch((error) => {
+      console.error("Error al obtener el usuario", error);
+      res.send(null); // Si hay un error, enviar null
+    });
+});
+
+app.use("/Match", match);
+app.use("/User", user);
+app.get("/", (req, res) => {
+  res.send("Conectado.");
+});
+app.post("/", (req, res) => {
+  const user = req.body;
+  console.log(user); // Aquí deberías poder ver los datos del usuario enviados desde Svelte
+  // ...
+});
+app.listen(3000, () => {
+  console.log("Servidor ExpressJS iniciado en el puerto 3000");
+});
+
+/*
 app.get("/protected", (req, res) => {
   console.log("asd" + req);
   console.log("ddd" + req.headers.authorization.length);
@@ -47,31 +171,4 @@ app.get("/protected", (req, res) => {
       console.log(error);
     });
 });
-
-/*
-const db = getFirestore();
-
-const res = db.collection('Usuarios').add({
-  name: 'Tokyo',
-  country: 'Japan'
-});
-
-console.log('Added document with ID: ', res.id);
 */
-
-app.use("/", match);
-app.use("/", user);
-
-app.get("/", (req, res) => {
-  res.send("Hola mundo");
-});
-
-app.post("/", (req, res) => {
-  const user = req.body;
-  console.log(user); // Aquí deberías poder ver los datos del usuario enviados desde Svelte
-  // ...
-});
-
-app.listen(3000, () => {
-  console.log("Servidor ExpressJS iniciado en el puerto 3000");
-});

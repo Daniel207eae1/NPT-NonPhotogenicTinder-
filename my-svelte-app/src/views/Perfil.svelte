@@ -6,25 +6,44 @@
 
   let person = [];
   let personHobbies = [];
+  let orientacion = "";
   var imghombre = "Images/PerfilHombre.png";
   var imgmujer = "Images/PerfilMujer.png";
 
   onMount(() => {
-    if ($user == null) {
+    if (!$user) {
       console.log("Estas siendo dirigido al Login desde perfil.");
-      console.log(user);
       navigate("/Login", { replace: true });
     } else {
-      fetch("http://localhost:3000/user")
-        .then((response) => response.json())
-        .then((data) => {
-          person = data;
-          personHobbies = data.hobbies;
-        });
+      ObtenerUsuario();
     }
   });
 
-  let response = null;
+  const ObtenerUsuario = async () => {
+    const uid = localStorage.getItem("uid");
+    const response = await fetch("http://localhost:3000/GetUser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid }),
+    });
+    const data = await response.json();
+    if (data != null) {
+      personHobbies = data.personHobbies;
+      person = data;
+      if (person.hetero) {
+        orientacion = "HETEROSEXUAL";
+      } else {
+        orientacion = "HOMOSEXUAL";
+      }
+    }
+    console.log(data.Hombre);
+  };
+
+  function EditarPerfil() {
+    navigate("/ConfigPerfil", { replace: true });
+  }
 </script>
 
 <Navbar />
@@ -40,7 +59,7 @@
     />
     <div class="Datos">
       <p>{person.name}</p>
-      <p>{person.orientacion}</p>
+      <p>{orientacion}</p>
       <p>{person.location}</p>
       <p>{person.age}</p>
     </div>
@@ -53,7 +72,7 @@
         </div>
       {/each}
     </div>
-    <a class="editar_btn" href="/ConfigPerfil"
+    <a class="editar_btn" href="/ConfigPerfil" on:click={EditarPerfil}
       ><img class="Editar" src="Images/Editar.png" alt="Editar" /></a
     >
     <div
@@ -93,6 +112,7 @@
       /* background: hsla(22, 47%, 35%, 0.707); */
       background: linear-gradient(#0998a588, rgb(51, 130, 161));
       overflow-y: scroll;
+      overflow-wrap: break-word;
       box-shadow: inset 4px 6px 4px rgba(0, 0, 0, 0.25);
     }
     .Descripcion_mujer {
@@ -103,6 +123,7 @@
       /* background: hsla(22, 47%, 35%, 0.707); */
       background: linear-gradient(#d0296688, rgb(185, 59, 118));
       overflow-y: scroll;
+      overflow-wrap: break-word;
       box-shadow: inset 4px 6px 4px rgba(0, 0, 0, 0.25);
     }
     .Gustoo {

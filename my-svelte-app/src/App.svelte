@@ -8,30 +8,9 @@
   import Login from "./views/Login.svelte";
   import ConfigPerfil from "./views/ConfigPerfil.svelte";
 
-  localStorage.setItem("render", false);
   const storedUser = localStorage.getItem("user");
-  function EnviarLogin() {
-    navigate("/Login", { replace: true });
-  }
-  function EnviarPerfil() {
-    navigate("/Perfil", { replace: true });
-  }
   onMount(async () => {
     await user.current();
-  });
-
-  onMount(() => {
-    console.log(localStorage.getItem("render"));
-    if (!localStorage.getItem("render")) {
-      if ($user) {
-        EnviarPerfil();
-      } else {
-        EnviarLogin();
-      }
-    }
-    if ($user) {
-      localStorage.setItem("render", true);
-    }
   });
 
   if (storedUser) {

@@ -1,5 +1,5 @@
 <script>
-  import { Link } from "svelte-routing";
+  import { Link, navigate } from "svelte-routing";
   import { user } from "../stores/User";
   import { auth } from "../firebase";
 
@@ -15,10 +15,7 @@
     try {
       await auth.signOut(auth);
       user.setUser(null);
-      localStorage.removeItem("user");
-      console.log("listo");
-      localStorage.removeItem("render");
-      localStorage.removeItem("token");
+      localStorage.clear();
       navigate("/Login", { replace: true });
     } catch (error) {
       console.log(error);
