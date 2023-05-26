@@ -10,9 +10,9 @@
   });
 
   let conversations = [
-    { person: "Usuario 1", messages: [], hombre: true },
-    { person: "Usuario 2", messages: [], hombre: true },
-    { person: "Usuario 3", messages: [], hombre: true },
+    { person: "Usuario 1", messages: [] },
+    { person: "Usuario 2", messages: [] },
+    { person: "Usuario 3", messages: [] },
   ];
 
   let activeConversation = conversations[0];
@@ -52,7 +52,7 @@
       {#each conversations as conversation}
         <li>
           <button
-            class="chat-button {conversation.hombre ? 'male' : 'female'}"
+            class="chat-button"
             on:click={() => switchConversation(conversation)}
           >
             Chat con {conversation.person}
@@ -132,17 +132,14 @@
     margin-bottom: 5px;
     border: none;
     border-radius: 0.25rem;
+    background-color: #0998a588;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
 
-  .chat-button.male {
-    background-color: #007bff;
-  }
-
-  .chat-button.female {
-    background-color: #ff1493;
+  .chat-button:hover {
+    background-color: #8e441f;
   }
 
   #Cambio_Chats {
