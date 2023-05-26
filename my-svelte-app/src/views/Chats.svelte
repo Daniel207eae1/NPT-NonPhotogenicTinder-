@@ -10,9 +10,6 @@
     if (!$user) {
       navigate("/Login", { replace: true });
     }
-    ObtenerRefConversacion().then(() => {
-      ObtenerConversacion();
-    });
   });
 
   const uid = localStorage.getItem("uid");
