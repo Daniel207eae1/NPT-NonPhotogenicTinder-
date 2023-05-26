@@ -2,47 +2,67 @@
   import { user } from "../stores/User";
   import { navigate } from "svelte-routing";
   import { auth, provider } from "../firebase";
-  import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+  import {
+    signInWithPopup,
+    GoogleAuthProvider,
+    FacebookAuthProvider,
+  } from "firebase/auth";
   import { onMount } from "svelte";
 
-  const procesarFormulario = async () => {
+  let res = null;
+  const procesarFormularioGoogle = async () => {
     try {
-      const res = await signInWithPopup(auth, provider);
+      res = await signInWithPopup(auth, new GoogleAuthProvider());
       localStorage.setItem("uid", res.user.uid);
+      procesar();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const procesarFormularioFacebook = async () => {
+    try {
+      res = await signInWithPopup(auth, new FacebookAuthProvider());
+      localStorage.setItem("uid", res.user.uid);
+      procesar();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-      //BUSCAR SI EL USUARIO ESTA EN LA BASE DE DATOS
-      try {
-        const requestOptions = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ uid: localStorage.getItem("uid") }),
-          //body: JSON.stringify(localStorage.getItem("uid")),
-        };
-        const request = new Request(
-          "http://localhost:3000/NewUser",
-          requestOptions
-        );
-        const response = await fetch(request);
-        const data = await response.text();
-        //respuesta = JSON.stringify(data);
-        //respuesta = data;
+  const procesar = async () => {
+    //BUSCAR SI EL USUARIO ESTA EN LA BASE DE DATOS
+    try {
+      const requestOptions = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uid: localStorage.getItem("uid") }),
+        //body: JSON.stringify(localStorage.getItem("uid")),
+      };
+      const request = new Request(
+        "http://localhost:3000/NewUser",
+        requestOptions
+      );
+      const response = await fetch(request);
+      const data = await response.text();
+      //respuesta = JSON.stringify(data);
+      //respuesta = data;
 
-        console.log(data);
-        if (data == "true") {
-          //IF USUARIO ESTA REGISTRADO
-          localStorage.setItem("user", user);
-          navigate("/Perfil", { replace: true });
-        } else {
-          //ELSE LLEVARLO A CONFIG PERFIL
-          navigate("/ConfigPerfil", { replace: true });
-        }
-      } catch (error) {}
+      console.log(data);
+      if (data == "true") {
+        //IF USUARIO ESTA REGISTRADO
+        localStorage.setItem("user", user);
+        navigate("/Perfil", { replace: true });
+      } else {
+        //ELSE LLEVARLO A CONFIG PERFIL
+        navigate("/ConfigPerfil", { replace: true });
+      }
+    } catch (error) {}
 
-      user.setUser(res.user);
+    user.setUser(res.user);
 
-      /*
+    /*
       const credential = GoogleAuthProvider.credentialFromResult(res);
       localStorage.setItem("token", credential.accessToken);
       console.log(localStorage.getItem("token"));
@@ -60,9 +80,6 @@
         response = "Error en la solicitud";
       }
       */
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   onMount(() => {
@@ -72,17 +89,6 @@
     }
     localStorage.clear();
   });
-
-  let Acceso = [
-    {
-      name: "Google",
-      logo: "Images/GoogleLogo.png",
-    },
-    {
-      name: "Facebook",
-      logo: "Images/FacebookLogo.png",
-    },
-  ];
 </script>
 
 <div class="bck">
@@ -91,16 +97,18 @@
 <div class="Contenedor">
   <img src="Images/Logo.png" id="LogoImage" alt="Logo" />
   <div class="AccesosProviders">
-    {#each Acceso as acceso}
-      <button class="Button" type="submit" on:click={procesarFormulario}>
-        <div class="Acceso">
-          <img src={acceso.logo} alt={acceso.name} />
-          <p>
-            Acceder con {acceso.name}
-          </p>
-        </div>
-      </button>
-    {/each}
+    <button class="Button" type="submit" on:click={procesarFormularioGoogle}>
+      <div class="Acceso">
+        <img src="Images/GoogleLogo.png" alt="" />
+        <p>Acceder con Google</p>
+      </div>
+    </button>
+    <button class="Button" type="submit" on:click={procesarFormularioFacebook}>
+      <div class="Acceso">
+        <img src="Images/FacebookLogo.png" alt="" />
+        <p>Acceder con Facebook</p>
+      </div>
+    </button>
   </div>
 </div>
 

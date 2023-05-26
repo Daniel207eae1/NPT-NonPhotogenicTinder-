@@ -2,9 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const app = express();
-const match = require("./routes/match.js");
-const NewUser = require("./routes/NewUser.js");
-const user = require("./stores/user.js");
 const {
   getFirestore,
   Timestamp,
@@ -27,14 +24,62 @@ app.use(
 );
 var admin = require("firebase-admin");
 var serviceAccount = require("./nonphotogenictinder-7d03b-firebase-adminsdk-i8laq-6891a32a36.json");
-
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
 const db = getFirestore();
-
 const Usuarios = db.collection("Usuarios");
+
+app.post("/SearchUser", (req, res) => {
+  const uid = req.body.uid;
+  let found = false;
+  let userenviar = null;
+  Usuarios.get()
+    .then((snapshot) => {
+      snapshot.forEach((doc) => {
+        const docid = doc.id;
+        const data = doc.data();
+        // Hacer algo con los datos de cada documento
+        if (docid !== uid) {
+          console.log("UID " + uid + "  DOCID  " + docid);
+          let quiz = true;
+          console.log("FOUNDUID");
+          Usuarios.doc(uid)
+            .collection("Story")
+            .get()
+            .then((snapshot) => {
+              snapshot.forEach((doc) => {
+                const subdocid = doc.id;
+                const subdata = doc.data();
+                console.log(subdocid);
+                // Hacer algo con los datos de cada documento
+                if (docid == subdocid) {
+                  quiz = false;
+                  return;
+                }
+              });
+            })
+            .catch((error) => {
+              console.log("Error al obtener subdocumentos", error);
+            });
+          if (quiz) {
+            console.log(data);
+            found = true;
+            userenviar = data;
+            return;
+          }
+        }
+      });
+      if (found == true) {
+        res.send(userenviar);
+      } else {
+        res.send(null);
+      }
+    })
+    .catch((error) => {
+      console.log("Error al obtener documentos", error);
+    });
+});
 
 app.post("/NewUser", (req, res) => {
   // tu lógica de manejo de la ruta aquí
@@ -102,6 +147,20 @@ app.post("/ConfigUsers", (req, res) => {
                     console.error("Error al crear usuario en Firestore", error);
                     res.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
                   });
+
+                db.collection("Usuarios")
+                  .doc(person.id)
+                  .collection("Story")
+                  .doc(person.id)
+                  .set({
+                    Match: false,
+                  })
+                  .then(() => {
+                    console.log("Story configurado en Firestore");
+                  })
+                  .catch((error) => {
+                    console.error("Error al crear usuario en Firestore", error);
+                  });
                 pd = true;
               }
             }
@@ -134,8 +193,6 @@ app.post("/GetUser", (req, res) => {
     });
 });
 
-app.use("/Match", match);
-app.use("/User", user);
 app.get("/", (req, res) => {
   res.send("Conectado.");
 });

@@ -4,63 +4,21 @@
   import { navigate } from "svelte-routing";
   import Navbar from "../components/Navbar.svelte";
 
-  let personas = [
-    {
-      name: "Juan Alberto Gutierrez",
-      age: 28,
-      orientacion: "Heterosexual",
-      location: "Medellin/Antioquia",
-      hobbies: [
-        "Cocinar",
-        "Leer",
-        "Viajar",
-        "Comer",
-        "Jugar Videojuegos",
-        "Perrear",
-        "Ver peliculas",
-        "Escuchar musica",
-        "Bailar tango",
-        "Salchipapa",
-        "Salsa choke",
-        "Comer pescado",
-        "Jugar futbol",
-      ],
-      descripcion:
-        "Hola me llamo juan y en realidad no existo pero es un buen test para la pagina :D",
-      Hombre: true,
-    },
-    {
-      name: "Daniela Gutierrez",
-      age: 22,
-      orientacion: "Heterosexual",
-      location: "Medellin/Antioquia",
-      hobbies: ["Cocinar", "Leer", "Viajar"],
-      descripcion:
-        "Hola me llamo Daniela y en realidad no existo pero es un buen test para la pagina :D",
-      Hombre: false,
-    },
-  ];
-
-  let personHobbies = [
-    "Cocinar",
-    "Leer",
-    "Viajar",
-    "Comer",
-    "Jugar Videojuegos",
-    "Perrear",
-    "Ver peliculas",
-    "Escuchar musica",
-    "Bailar tango",
-    "Salchipapa",
-    "Salsa choke",
-    "Comer pescado",
-    "Jugar futbol",
-  ];
+  let personas = {
+    name: "",
+    age: 0,
+    hetero: true,
+    location: "",
+    hobbies: [],
+    descripcion: "",
+    Hombre: true,
+  };
+  let personHobbies = [];
   var perfilimagen;
   var colores;
-  let cuenta = 0;
+  let orientacion = "";
   $: {
-    if (personas[cuenta].Hombre == true) {
+    if (personas.Hombre == true) {
       perfilimagen = "Images/PerfilHombre.png";
       colores = "#0998a588";
     } else {
@@ -69,17 +27,38 @@
     }
   }
   const SiMatch = () => {
-    cuenta++;
     //FUNCION PARA PONERLO EN LOS USERS DEL USUARIO EN FIRESTORE
   };
-  const NoMatch = () => {
-    cuenta++;
-  };
+  const NoMatch = () => {};
   onMount(() => {
     if (!$user) {
       navigate("/Login", { replace: true });
+    } else {
+      ObtenerUsuario();
     }
   });
+
+  const ObtenerUsuario = async () => {
+    const uid = localStorage.getItem("uid");
+    const response = await fetch("http://localhost:3000/SearchUser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid }),
+    });
+    const data = await response.json();
+    if (data != null) {
+      personHobbies = data.personHobbies;
+      personas = data;
+      if (personas.hetero) {
+        orientacion = "HETEROSEXUAL";
+      } else {
+        orientacion = "HOMOSEXUAL";
+      }
+    }
+    console.log(data);
+  };
 </script>
 
 <Navbar />
@@ -90,20 +69,16 @@
         <img src={perfilimagen} alt="" />
       </div>
       <div class="Datos">
-        <p>{personas[cuenta].name}</p>
-        <p>{personas[cuenta].orientacion}</p>
-        <p>{personas[cuenta].location}</p>
-        <p>{personas[cuenta].age}</p>
+        <p>{personas.name}</p>
+        <p>{orientacion}</p>
+        <p>{personas.location}</p>
+        <p>{personas.age}</p>
       </div>
     </div>
     <div class="Gustos">
       {#each personHobbies as hobbie}
         <div class="Gusto">
-          <p
-            class="Gustoo {personas[cuenta].Hombre
-              ? 'gusto_hombre'
-              : 'gusto_mujer'}"
-          >
+          <p class="Gustoo {personas.Hombre ? 'gusto_hombre' : 'gusto_mujer'}">
             {hobbie}
           </p>
         </div>
