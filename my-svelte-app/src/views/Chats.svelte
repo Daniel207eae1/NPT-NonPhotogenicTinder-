@@ -18,8 +18,9 @@
   const uid = localStorage.getItem("uid");
 
   let conversations = [
-    { person: "ss", messages: [] },
-    { person: "aa", messages: [] },
+    { person: "Usuario 1", messages: [], hombre: true },
+    { person: "Usuario 2", messages: [], hombre: true },
+    { person: "Usuario 3", messages: [], hombre: true },
   ];
 
   const ObtenerRefConversacion = async () => {
@@ -93,11 +94,14 @@
 <Navbar />
 <div class="chat-container">
   <div>
-    <h2>Chats</h2>
+    <h2 id="Cambio_Chats">Chats</h2>
     <ul>
       {#each conversations as conversation}
         <li>
-          <button on:click={() => switchConversation(conversation)}>
+          <button
+            class="chat-button {conversation.hombre ? 'male' : 'female'}"
+            on:click={() => switchConversation(conversation)}
+          >
             Chat con {conversation.person}
           </button>
         </li>
@@ -166,6 +170,30 @@
     background-color: #ac98668d;
     overflow: auto;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  }
+
+  .chat-button {
+    padding: 20px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    margin-bottom: 5px;
+    border: none;
+    border-radius: 0.25rem;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .chat-button.male {
+    background-color: #007bff;
+  }
+
+  .chat-button.female {
+    background-color: #ff1493;
+  }
+
+  #Cambio_Chats {
+    font-size: 3em;
   }
 
   .message-list {
