@@ -30,6 +30,62 @@ admin.initializeApp({
 const db = getFirestore();
 const Usuarios = db.collection("Usuarios");
 
+app.post("/GetRefChats", (req, res) => {
+  const uid = req.body.uid;
+  console.log("Lllamado");
+  const conversations = [];
+
+  Usuarios.doc(uid)
+    .collection("Chats")
+    .get()
+    .then((snapshot) => {
+      snapshot.forEach((doc) => {
+        conversations.push(doc.data());
+      });
+      res.send(conversations);
+    })
+    .catch((error) => {
+      console.log("Error al obtener documentos", error);
+    });
+});
+
+app.post("/GetChat", (req, res) => {
+  const uid = req.body.uid;
+  const idchat = req.body.idchat;
+
+  const conversations = [{ person: uid, messages: [] }];
+  console.log(idchat);
+  Usuarios.doc(uid)
+    .collection("Chats")
+    .doc(idchat)
+    .collection("Mensajes")
+    .get()
+    .then((snapshot) => {
+      snapshot.forEach((doc) => {
+        console.log(doc.body);
+        if (doc.IdEmisor == uid) {
+          const message = {
+            content: doc.body,
+            sender: "Usuario Actual",
+          };
+          conversations.messages = [...activeConversation.messages, message];
+        } else {
+          const message = {
+            content: doc.body,
+            sender: "Otro Usuario",
+          };
+          conversations.messages = [...activeConversation.messages, message];
+        }
+      });
+    })
+    .then(() => {
+      res.send(conversations);
+    })
+    .catch((error) => {
+      console.log("Error al obtener documentos", error);
+    });
+});
+
 app.post("/SiMatch", (req, res) => {
   const uidemisor = req.body.uid;
   const uidreceptor = req.body.id;
@@ -47,6 +103,7 @@ app.post("/SiMatch", (req, res) => {
       Recibido: false,
     })
     .then(() => {
+      console.log("SI");
       //console.log("Usuario configurado en Firestore");
       //res.send(true); // Enviar un valor booleano true si el usuario se crea correctamente
     })
@@ -90,28 +147,33 @@ app.post("/SiMatch", (req, res) => {
           .then((docRef) => {
             //console.log("IDD" + docRef.id);
             chatref = docRef.id;
+            console.log(chatref);
+          })
+          .then(() => {
+            console.log("id  " + chatref);
+            db.collection("Usuarios")
+              .doc(uidemisor)
+              .collection("Chats")
+              .add({
+                id: chatref,
+                started: true,
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          })
+          .then(() => {
+            db.collection("Usuarios").doc(uidreceptor).collection("Chats").add({
+              id: chatref,
+              started: true,
+            });
+            console.log("a punto");
+            res.send(true);
           })
           .catch((error) => {
             console.error("Error al crear chat en Firestore", error);
             //es.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
           });
-        console.log("id  " + chatref);
-        db.collection("Usuarios")
-          .doc(uidemisor)
-          .collection("Chats")
-          .add({
-            id: chatref,
-            started: true,
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-        db.collection("Usuarios").doc(uidreceptor).collection("Chats").add({
-          id: chatref,
-          started: true,
-        });
-        console.log("a punto");
-        res.send(true);
       } else {
         console.log("POR QUE");
         if (found) {

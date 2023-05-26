@@ -3,20 +3,64 @@
   import { navigate } from "svelte-routing";
   import { onMount } from "svelte";
   import Navbar from "../components/Navbar.svelte";
+  import LoadingContainer from "../components/LoadingContainer.svelte";
+  import { writable } from "svelte/store";
 
-  onMount(() => {
+  onMount(async () => {
     if (!$user) {
       navigate("/Login", { replace: true });
     }
+    ObtenerRefConversacion().then(() => {
+      ObtenerConversacion();
+    });
   });
 
+  const uid = localStorage.getItem("uid");
+
   let conversations = [
-    { person: "Usuario 1", messages: [] },
-    { person: "Usuario 2", messages: [] },
-    { person: "Usuario 3", messages: [] },
+    { person: "ss", messages: [] },
+    { person: "aa", messages: [] },
   ];
 
+  const ObtenerRefConversacion = async () => {
+    const response = await fetch("http://localhost:3000/GetRefChats", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid }),
+    });
+    const data = await response.json();
+    console.log(data);
+    if (data != null) {
+      let conversationsRef = data;
+      conversationsRef.forEach((conversation) => {
+        conversations.push({ person: conversation.id, messages: [] });
+      });
+      console.log(conversations);
+      localStorage.setItem("ref", conversationsRef);
+    }
+  };
+
+  console.log(conversations);
+  const ObtenerConversacion = async () => {
+    const idchat = activeConversation.person;
+    const response = await fetch("http://localhost:3000/GetChat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid, idchat }),
+    });
+    const data = await response.json();
+    if (data != null) {
+      console.log(data);
+      activeConversation = data;
+    }
+  };
+
   let activeConversation = conversations[0];
+  console.log(activeConversation);
   let newMessage = "";
 
   function switchConversation(conversation) {
@@ -125,7 +169,7 @@
   }
 
   .message-list {
-    max-height: 80%;
+    max-height: 78%;
     overflow-y: auto;
     list-style-type: none;
     padding-right: 0.5rem;
@@ -139,7 +183,7 @@
     margin-bottom: 10px;
   }
 
-  .message-list > li > .message {
+  .message-list li .message {
     background-color: #f9f8f781;
     padding: 8px;
     border-radius: 8px 8px 0 8px;

@@ -44,8 +44,8 @@
       } else {
         orientacion = "HOMOSEXUAL";
       }
+      isLoading = false;
     }
-    isLoading = false;
   };
 
   function EditarPerfil() {
