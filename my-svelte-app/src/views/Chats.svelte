@@ -123,9 +123,12 @@
   }
 
   .message-list {
+    max-height: 80%;
+    overflow-y: auto;
     list-style-type: none;
-    padding: 0;
-    margin: 0;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+    margin-top: 1rem;
     align-self: flex-start;
   }
 
@@ -137,7 +140,6 @@
   .message-list li .message {
     background-color: #f9f8f781;
     padding: 8px;
-    max-width: 70%;
     border-radius: 8px 8px 0 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     word-wrap: break-word;
@@ -151,9 +153,16 @@
     justify-content: flex-start;
   }
 
+  .message-list li .message-container {
+    max-width: 70%;
+  }
+
   .input-container {
-    position: sticky;
+    position: absolute;
     display: flex;
+    bottom: 5%;
+    right: 10%;
+    left: 10%;
     margin-top: 10px;
   }
 
