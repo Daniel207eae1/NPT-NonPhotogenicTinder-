@@ -30,10 +30,163 @@ admin.initializeApp({
 const db = getFirestore();
 const Usuarios = db.collection("Usuarios");
 
+app.post("/SiMatch", (req, res) => {
+  const uidemisor = req.body.uid;
+  const uidreceptor = req.body.id;
+
+  console.log("EMI" + uidemisor + "  REC" + uidreceptor);
+  let match;
+  let found = false;
+  //CONFIGURACION PARA EL SUBUSERS DEL EMISOR
+  db.collection("Usuarios")
+    .doc(uidemisor)
+    .collection("Story")
+    .doc(uidreceptor)
+    .set({
+      Match: true,
+      Recibido: false,
+    })
+    .then(() => {
+      //console.log("Usuario configurado en Firestore");
+      //res.send(true); // Enviar un valor booleano true si el usuario se crea correctamente
+    })
+    .catch((error) => {
+      //console.error("Error al crear usuario en Firestore", error);
+      //res.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
+    });
+
+  //GET PARA SABER SI EL EMISOR YA NOS TENIA EN MATCH
+  db.collection("Usuarios")
+    .doc(uidreceptor)
+    .collection("Story")
+    .doc(uidemisor)
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        const document = doc.data();
+        if (document.Match == true) {
+          console.log("MSSS");
+          match = true;
+        } else {
+          found = true;
+          match = false;
+        }
+        //Hacer funcion para agregar a la coleccion matchs
+      } else {
+        match = false;
+      }
+    })
+    .then(() => {
+      let chatref = "";
+      //CONFIGURACION PARA EL SUBUSERS DEL RECEPTOR Y POSTERIOR CREACION DE CHAT SI LO HAY
+      if (match) {
+        console.log("ENTRO");
+        const colRef = db
+          .collection("Chats")
+          .add({
+            User1: uidemisor,
+            User2: uidreceptor,
+          })
+          .then((docRef) => {
+            //console.log("IDD" + docRef.id);
+            chatref = docRef.id;
+          })
+          .catch((error) => {
+            console.error("Error al crear chat en Firestore", error);
+            //es.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
+          });
+        console.log("id  " + chatref);
+        db.collection("Usuarios")
+          .doc(uidemisor)
+          .collection("Chats")
+          .add({
+            id: chatref,
+            started: true,
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        db.collection("Usuarios").doc(uidreceptor).collection("Chats").add({
+          id: chatref,
+          started: true,
+        });
+        console.log("a punto");
+        res.send(true);
+      } else {
+        console.log("POR QUE");
+        if (found) {
+          db.collection("Usuarios")
+            .doc(uidemisor)
+            .collection("Story")
+            .doc(uidreceptor)
+            .set({
+              Match: false,
+              Recibido: false,
+            })
+            .then(() => {
+              //console.log("Usuario configurado en Firestore");
+              res.send(false); // Enviar un valor booleano true si el usuario se crea correctamente
+            })
+            .catch((error) => {
+              //console.error("Error al crear usuario en Firestore", error);
+              res.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
+            });
+        } else {
+          db.collection("Usuarios")
+            .doc(uidreceptor)
+            .collection("Story")
+            .doc(uidemisor)
+            .set({
+              Match: false,
+              Recibido: true,
+            })
+            .then(() => {
+              console.log("Usuario configurado en Firestore");
+              res.send(false); // Enviar un valor booleano true si el usuario se crea correctamente
+            })
+            .catch((error) => {
+              console.error("Error al crear usuario en Firestore", error);
+              res.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
+            });
+        }
+      }
+    })
+    .catch((error) => {
+      //console.error("Error al obtener el usuario", error);
+      //res.send(null); // Si hay un error, enviar null
+    });
+});
+
+app.post("/NoMatch", (req, res) => {
+  const uidemisor = req.body.uid;
+  const uidreceptor = req.body.id;
+
+  db.collection("Usuarios")
+    .doc(uidemisor)
+    .collection("Story")
+    .doc(uidreceptor)
+    .set({
+      Match: false,
+      Recibido: false,
+    })
+    .then(() => {
+      //console.log("Usuario configurado en Firestore");
+      //res.send(true); // Enviar un valor booleano true si el usuario se crea correctamente
+      res.send(true);
+    })
+    .catch((error) => {
+      //console.error("Error al crear usuario en Firestore", error);
+      //res.send(false); // Enviar un valor booleano false si hay un error al crear el usuario
+      res.send(false);
+    });
+});
+
 app.post("/SearchUser", (req, res) => {
   const uid = req.body.uid;
   let found = false;
   let userenviar = null;
+  let enviado = false;
+
   Usuarios.get()
     .then((snapshot) => {
       snapshot.forEach((doc) => {
@@ -41,9 +194,9 @@ app.post("/SearchUser", (req, res) => {
         const data = doc.data();
         // Hacer algo con los datos de cada documento
         if (docid !== uid) {
-          console.log("UID " + uid + "  DOCID  " + docid);
+          //console.log("UID " + uid + "  DOCID  " + docid);
           let quiz = true;
-          console.log("FOUNDUID");
+          //console.log("FOUNDUID");
           Usuarios.doc(uid)
             .collection("Story")
             .get()
@@ -51,30 +204,48 @@ app.post("/SearchUser", (req, res) => {
               snapshot.forEach((doc) => {
                 const subdocid = doc.id;
                 const subdata = doc.data();
-                console.log(subdocid);
+                //console.log("Sub  " + subdocid + "  UID" + uid + "  " + docid);
                 // Hacer algo con los datos de cada documento
-                if (docid == subdocid) {
-                  quiz = false;
-                  return;
+                if (quiz == true) {
+                  if (docid === subdocid) {
+                    //console.log("Está  " + docid + "   " + subdocid);
+                    if (subdata.Recibido == false) {
+                      //console.log("No vino aqui");
+                      quiz = false;
+                      return;
+                    } else {
+                      //console.log("vino aqui");
+                      quiz = true;
+                      return;
+                    }
+                  } else {
+                    //console.log("vino aquissss");
+                    quiz = true;
+                  }
                 }
               });
+            })
+            .then(() => {
+              //console.log(quiz);
+              if (quiz) {
+                //console.log("ass" + quiz);
+                found = true;
+                userenviar = data;
+                return;
+              }
+            })
+            .then(() => {
+              if (enviado == false && quiz == true) {
+                //console.log("enviado:   " + userenviar);
+                enviado = true;
+                res.send(userenviar);
+              }
             })
             .catch((error) => {
               console.log("Error al obtener subdocumentos", error);
             });
-          if (quiz) {
-            console.log(data);
-            found = true;
-            userenviar = data;
-            return;
-          }
         }
       });
-      if (found == true) {
-        res.send(userenviar);
-      } else {
-        res.send(null);
-      }
     })
     .catch((error) => {
       console.log("Error al obtener documentos", error);
@@ -154,6 +325,7 @@ app.post("/ConfigUsers", (req, res) => {
                   .doc(person.id)
                   .set({
                     Match: false,
+                    Recibido: false,
                   })
                   .then(() => {
                     console.log("Story configurado en Firestore");

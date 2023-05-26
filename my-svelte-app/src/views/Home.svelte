@@ -3,11 +3,15 @@
   import { onMount } from "svelte";
   import { navigate } from "svelte-routing";
   import Navbar from "../components/Navbar.svelte";
+  import LoadingContainer from "../components/LoadingContainer.svelte";
+
+  let isLoading = true;
 
   let personas = {
     name: "",
     age: 0,
     hetero: true,
+    id: "",
     location: "",
     hobbies: [],
     descripcion: "",
@@ -26,19 +30,66 @@
       colores = "#d0296688";
     }
   }
-  const SiMatch = () => {
+
+  const SiMatch = async () => {
     //FUNCION PARA PONERLO EN LOS USERS DEL USUARIO EN FIRESTORE
+    const uid = localStorage.getItem("uid");
+    const id = personas.id;
+    const response = await fetch("http://localhost:3000/SiMatch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid, id }),
+    });
+    const data = await response.text();
+    //console.log("lll");
+    //console.log(data);
+    if (data == "true") {
+      //ENVIAR A CHATS
+      navigate("/Chats", { replace: true });
+    } else {
+      //REFRESCAR PERSONAS
+      ObtenerUsuario();
+    }
+    console.log(data);
   };
-  const NoMatch = () => {};
+
+  const NoMatch = async () => {
+    const uid = localStorage.getItem("uid");
+    const id = personas.id;
+    const response = await fetch("http://localhost:3000/NoMatch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid, id }),
+    });
+    const data = await response.text();
+    //console.log("lll");
+    //console.log(data);
+    if (data == "true") {
+      ObtenerUsuario();
+    } else {
+      //REFRESCAR PERSONAS
+      alert("Ocurrio un error inesperado");
+    }
+  };
+
   onMount(() => {
+    isLoading = true;
     if (!$user) {
       navigate("/Login", { replace: true });
     } else {
       ObtenerUsuario();
     }
+    window.onload = () => {
+      isLoading = false;
+    };
   });
 
   const ObtenerUsuario = async () => {
+    isLoading = true;
     const uid = localStorage.getItem("uid");
     const response = await fetch("http://localhost:3000/SearchUser", {
       method: "POST",
@@ -49,6 +100,7 @@
     });
     const data = await response.json();
     if (data != null) {
+      isLoading = false;
       personHobbies = data.personHobbies;
       personas = data;
       if (personas.hetero) {
@@ -61,6 +113,7 @@
   };
 </script>
 
+<LoadingContainer show={isLoading} />
 <Navbar />
 <div class="Contenedor">
   <div class="Perfil">

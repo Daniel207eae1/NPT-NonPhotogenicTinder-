@@ -3,7 +3,9 @@
   import { onMount } from "svelte";
   import { navigate } from "svelte-routing";
   import Navbar from "../components/Navbar.svelte";
+  import LoadingContainer from "../components/LoadingContainer.svelte";
 
+  let isLoading = true;
   let person = [];
   let personHobbies = [];
   let orientacion = "";
@@ -11,15 +13,20 @@
   var imgmujer = "Images/PerfilMujer.png";
 
   onMount(() => {
+    isLoading = true;
     if (!$user) {
       console.log("Estas siendo dirigido al Login desde perfil.");
       navigate("/Login", { replace: true });
     } else {
       ObtenerUsuario();
     }
+    window.onload = () => {
+      isLoading = false;
+    };
   });
 
   const ObtenerUsuario = async () => {
+    isLoading = true;
     const uid = localStorage.getItem("uid");
     const response = await fetch("http://localhost:3000/GetUser", {
       method: "POST",
@@ -38,7 +45,7 @@
         orientacion = "HOMOSEXUAL";
       }
     }
-    console.log(data.Hombre);
+    isLoading = false;
   };
 
   function EditarPerfil() {
@@ -46,6 +53,7 @@
   }
 </script>
 
+<LoadingContainer show={isLoading} />
 <Navbar />
 <div class="bck">
   <img src="Images/BackgroundLogin.png" id="Background" alt="Background" />

@@ -3,19 +3,18 @@
   import { navigate } from "svelte-routing";
   import { onMount } from "svelte";
   import { auth } from "../firebase";
+  import LoadingContainer from "../components/LoadingContainer.svelte";
 
-  onMount(() => {
-    if ($user == null) {
-      navigate("/Login", { replace: true });
-    }
-  });
-
+  let isLoading = true;
   const uid = localStorage.getItem("uid");
   let nuevoHobbie = "";
   let personHobbies = [];
   let person = {};
+  let genero;
+  let orien;
   //IF ESTA CREADO COGER LOS DATOS DE LA BD
   if (localStorage.getItem("user")) {
+    isLoading = true;
     console.log("ejecc");
     const ObtenerUsuario = async () => {
       const response = await fetch("http://localhost:3000/GetUser", {
@@ -33,6 +32,7 @@
       console.log(data.Hombre);
     };
     ObtenerUsuario();
+    isLoading = false;
   }
   //IF NO ESTA CREADO CREAR VARIABLES VACIAS Y RELLENAR CON LOS CAMPOS.
   else {
@@ -48,8 +48,8 @@
       Configurado: true,
     };
   }
-  console.log(personHobbies.length);
   const GuardarCambios = async () => {
+    isLoading = true;
     var switchLabel = document.getElementById("switchLabel");
     var switchLabelHH = document.getElementById("switchLabelHH");
     if (switchLabel.textContent == "FEMENINO") {
@@ -63,8 +63,6 @@
     } else {
       person.hetero = true;
     }
-
-    console.log("aa" + personHobbies);
     const response = await fetch("http://localhost:3000/ConfigUsers", {
       method: "POST",
       headers: {
@@ -90,6 +88,7 @@
       //ELSE LLEVARLO A CONFIG PERFIL
       alert("REVISA LOS CAMPOS QUE ESTAN EN ROJO.");
     }
+    isLoading = false;
   };
 
   function changeSwitch() {
@@ -133,6 +132,27 @@
     }
     console.log(switchLabel.textContent);
   }
+  onMount(() => {
+    isLoading = true;
+    if ($user == null) {
+      navigate("/Login", { replace: true });
+    }
+    window.onload = () => {
+      isLoading = false;
+    };
+  });
+
+  $: if (person.Hombre) {
+    genero = "MASCULINO";
+  } else {
+    genero = "FEMENINO";
+  }
+
+  $: if (person.hetero) {
+    orien = "HETEROSEXUAL";
+  } else {
+    orien = "HOMOSEXUAL";
+  }
 
   //Si esta configurado ya hacer algo
 
@@ -141,6 +161,7 @@
   $: esHomo = !person.hetero;
 </script>
 
+<LoadingContainer show={isLoading} />
 <p id="Title">Configuracion de Perfil</p>
 <div class="bck">
   <img src="Images/BackgroundLogin.png" id="Background" alt="Background" />
@@ -151,7 +172,7 @@
     <label class="switch">
       <input type="checkbox" on:change={changeSwitch} checked={esMujer} />
       <span class="slider" />
-      <span id="switchLabel">MASCULINO</span>
+      <span id="switchLabel">{genero}</span>
     </label>
     <p>Nombre</p>
     <div class="textbox-container">
@@ -168,7 +189,7 @@
     <label class="switchHH">
       <input type="checkbox" on:change={changeSwitchHH} checked={esHomo} />
       <span class="sliderHH" />
-      <span id="switchLabelHH">HETEROSEXUAL</span>
+      <span id="switchLabelHH">{orien}</span>
     </label>
     <p>Ciudad</p>
     <div class="textbox-container">

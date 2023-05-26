@@ -115,12 +115,13 @@
     margin-bottom: 10px;
   }
 
-  .message-list li .message {
+  .message-list > li > .message {
     background-color: #f9f8f781;
     padding: 8px;
     max-width: 70%;
     border-radius: 8px 8px 0 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    margin: 0%;
     word-wrap: break-word;
   }
 

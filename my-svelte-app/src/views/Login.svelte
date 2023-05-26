@@ -8,6 +8,9 @@
     FacebookAuthProvider,
   } from "firebase/auth";
   import { onMount } from "svelte";
+  import LoadingContainer from "../components/LoadingContainer.svelte";
+
+  let isLoading = true;
 
   let res = null;
   const procesarFormularioGoogle = async () => {
@@ -30,6 +33,7 @@
   };
 
   const procesar = async () => {
+    isLoading = true;
     //BUSCAR SI EL USUARIO ESTA EN LA BASE DE DATOS
     try {
       const requestOptions = {
@@ -80,6 +84,7 @@
         response = "Error en la solicitud";
       }
       */
+    isLoading = false;
   };
 
   onMount(() => {
@@ -88,9 +93,13 @@
       console.log("Dirigiendo a perfil..");
     }
     localStorage.clear();
+    window.onload = () => {
+      isLoading = false;
+    };
   });
 </script>
 
+<LoadingContainer show={isLoading} />
 <div class="bck">
   <img src="Images/BackgroundLogin.png" id="Background" alt="Background" />
 </div>
